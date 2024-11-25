@@ -1,0 +1,103 @@
+.container {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  max-width: 800px;
+  position: relative;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.chatBox {
+
+  height: 100%;
+  border-radius: 10px;
+  /* background-color: rgba(255, 0, 0, 0.3); */
+  min-width: 500px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  padding: 20px;
+  overflow-y: scroll;
+  box-shadow: rgba(0, 0, 0, 0.05) 0px 6px 24px 0px, rgba(0, 0, 0, 0.08) 0px 0px 0px 1px;
+}
+
+.chatBox::-webkit-scrollbar {
+  display: none;
+}
+
+.chatItem {
+  width: auto;
+  height: auto;
+  display: flex;
+  flex-direction: column;
+  max-width: 800px;
+  min-width: 100px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.chatItem>strong {
+  padding-bottom: 8px;
+  /* transform: translateX(10px); */
+}
+
+.message {
+  width: auto;
+  background: #eeeeee;
+  padding: 8px 22px;
+  border-radius: 5px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.inputContainer {
+  width: 100%;
+  min-height: 90px;
+
+  padding: 20px 0 0 0;
+  display: flex;
+  flex-direction: row;
+  /* align-items: center; */
+  justify-content: center;
+}
+
+.input {
+  width: 400px;
+  height: 38px;
+  padding: 0 10px;
+  border-radius: 5px;
+  border: 0px;
+  transition: all 0.5s;
+  border: 0.5px solid rgba(128, 128, 128, 0.3);
+}
+.input:focus {
+  outline: none;
+  box-shadow: rgba(99, 99, 99, 0.2) 0px 2px 8px 0px;
+}
+
+.button {
+  transition: all 0.5s;
+  width: 100px;
+  height: 40px;
+  line-height: 40px;
+  padding: 0;
+  /* transform: translateY(3px); */
+  background-color: rgba(220, 220, 220, 0.4);
+}
+
+@media only screen and (max-width: 767px) {
+  /* 这里放置针对手机的样式 */
+  
+  .chatBox{
+    max-width: 100vw;
+    max-height: 100vh;
+    min-width: unset;
+  }
+}

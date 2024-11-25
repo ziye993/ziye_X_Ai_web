@@ -1,0 +1,33 @@
+.toolContainer {
+  position: fixed;
+  top: 50px;
+  right: 20px;
+  width: auto;
+  transform: translateX(120px);
+}
+
+.toolContainerItem {
+  width: auto;
+  height: 44px;
+  line-height: 44px;
+  padding: 0 20px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+  transition: all 0.4s;
+  cursor: pointer;
+  margin: 2px 0;
+  background-color: #eeeeee;
+  border-radius: 5px;
+}
+
+.toolContainerItem:hover {
+  transform: translateX(-50%);
+  box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
+}
+
+.toolContainerItem>span {
+  display: inline-block;
+  padding: 0 20px 0 0;
+}
