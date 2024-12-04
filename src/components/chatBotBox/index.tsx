@@ -4,18 +4,17 @@ import axios from "axios";
 import './index.css'
 import 'highlight.js/styles/github.css'; // 选择一个样式
 import { ICachItem, IListItem } from "../../App";
+import chunkText from "./stream";
 
 interface IProps {
   cacheMessages: IListItem;
   saveChat: (id: string, cach: ICachItem[]) => void;
 }
 
-const apiEndpoint = "https://api.x.ai/v1/chat/completions"; // 替换为实际的 API 端点
-const apiKey = "xai-EAKTZcMC9wPG6sZKbcsezRBlT6rme8AcC1WHp96ZqG50rL14ObIgfAL2Bl9ypx8u1Dz7B3zYk76HdN4P"; // 替换为实际的 API 密钥
-
 function ChatBot(props: IProps) {
   // const [messages, setMessages] = useState<{ role: string; content: string }[]>(props?.cacheMessages?.cach || []);
-  const [inputDisable, setDisable] = useState<boolean>(false)
+  const [inputDisable, setDisable] = useState<boolean>(false);
+  const [currentText, setCurrentText] = useState("")
   const [input, setInput] = useState("");
   const sendMessage = async () => {
     if (!input.trim()) return;
@@ -23,34 +22,50 @@ function ChatBot(props: IProps) {
     // props.saveChat(props.cacheMessages?.id, [...props.cacheMessages.cach, { role: "user", content: input }])
     try {
       // 调用 X.AI API
-      const response = await axios.post(
-        apiEndpoint,
+      // const response = await axios.post(
+      //   apiEndpoint,
+      //   {
+      //     "messages": [
+      //       ...(props?.cacheMessages?.cach || []),
+      //       {
+      //         "role": "user",
+      //         "content": input
+      //       }
+      //     ],
+      //     "model": "grok-beta",
+      //     "stream": false,
+      //     "temperature": 0
+      //   },
+      //   {
+      //     headers: {
+      //       Authorization: `Bearer ${apiKey}`,
+      //       "Content-Type": "application/json",
+      //     },
+      //   }
+      // );
+      chunkText([
+        ...(props?.cacheMessages?.cach || []),
         {
-          "messages": [
-            ...(props?.cacheMessages?.cach || []),
-            {
-              "role": "user",
-              "content": input
-            }
-          ],
-          "model": "grok-beta",
-          "stream": false,
-          "temperature": 0
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${apiKey}`,
-            "Content-Type": "application/json",
-          },
+          "role": "user",
+          "content": input
         }
-      );
-      const aiMessage = response?.data?.choices?.[0]?.message?.content;
-      // 添加 AI 的回复到界面
-      if (aiMessage) {
-        props.saveChat(props.cacheMessages?.id, [...props.cacheMessages.cach, { role: "user", content: input }, { role: "system", content: aiMessage }])
-      } else {
-        throw Error("未找到消息，请查看返回值对象路径")
-      }
+      ], (chunk) => {
+        const text = chunk?.choices?.[0]?.delta?.content;
+        console.log(text, chunk, 'chunk');
+        setCurrentText((prev) => prev + text);
+        if (!chunk) {
+          props.saveChat(props.cacheMessages?.id, [...props.cacheMessages.cach, { role: "user", content: input }, { role: "assistant", content: currentText + text }]);
+          setDisable(false)
+        }
+      })
+
+      // const aiMessage = response?.data?.choices?.[0]?.message?.content;
+      // // 添加 AI 的回复到界面
+      // if (aiMessage) {
+      //   props.saveChat(props.cacheMessages?.id, [...props.cacheMessages.cach, { role: "user", content: input }, { role: "system", content: aiMessage }])
+      // } else {
+      //   throw Error("未找到消息，请查看返回值对象路径")
+      // }
     } catch (error) {
       console.error("Error communicating with X.AI API:", error);
     }
@@ -77,7 +92,7 @@ function ChatBot(props: IProps) {
               style={{
                 backgroundColor: msg.role === "user" ? "#DCF8C6" : "#eeeeee",
               }}>
-              {msg.content && (msg.role === "user" ? msg.content : <div dangerouslySetInnerHTML={{ __html: marked(msg.content) }} />)}
+              {msg.content && (msg.role === "user" ? msg.content : <div dangerouslySetInnerHTML={{ __html: marked(inputDisable ? currentText : msg.content) }} />)}
             </div>
           </div>
         ))}
