@@ -1,6 +1,5 @@
-import React, { forwardRef, useState } from "react";
+import React, { memo, useState } from "react";
 import { marked } from 'marked';
-import axios from "axios";
 import './index.css'
 import 'highlight.js/styles/github.css'; // 选择一个样式
 import { ICachItem, IListItem } from "../../App";
@@ -14,63 +13,41 @@ interface IProps {
 function ChatBot(props: IProps) {
   // const [messages, setMessages] = useState<{ role: string; content: string }[]>(props?.cacheMessages?.cach || []);
   const [inputDisable, setDisable] = useState<boolean>(false);
-  const [currentText, setCurrentText] = useState("")
+  const [currentText, setCurrentText] = useState('')
   const [input, setInput] = useState("");
+
   const sendMessage = async () => {
     if (!input.trim()) return;
     setDisable(true);
-    // props.saveChat(props.cacheMessages?.id, [...props.cacheMessages.cach, { role: "user", content: input }])
+    props.saveChat(props.cacheMessages?.id, [...props.cacheMessages.cach, { role: "user", content: input }]);
+
     try {
-      // 调用 X.AI API
-      // const response = await axios.post(
-      //   apiEndpoint,
-      //   {
-      //     "messages": [
-      //       ...(props?.cacheMessages?.cach || []),
-      //       {
-      //         "role": "user",
-      //         "content": input
-      //       }
-      //     ],
-      //     "model": "grok-beta",
-      //     "stream": false,
-      //     "temperature": 0
-      //   },
-      //   {
-      //     headers: {
-      //       Authorization: `Bearer ${apiKey}`,
-      //       "Content-Type": "application/json",
-      //     },
-      //   }
-      // );
-      chunkText([
+      let messages = "";
+      await chunkText([
         ...(props?.cacheMessages?.cach || []),
         {
           "role": "user",
           "content": input
         }
-      ], (chunk) => {
-        const text = chunk?.choices?.[0]?.delta?.content;
-        console.log(text, chunk, 'chunk');
-        setCurrentText((prev) => prev + text);
-        if (!chunk) {
-          props.saveChat(props.cacheMessages?.id, [...props.cacheMessages.cach, { role: "user", content: input }, { role: "assistant", content: currentText + text }]);
-          setDisable(false)
+      ], (text, end) => {
+        if (text) {
+          setCurrentText((prev) => {
+            messages = prev + text;
+            // props.saveChat(props.cacheMessages?.id, [...props.cacheMessages.cach, { role: "user", content: input }, { role: "assistant", content: messages }]);
+            return prev + text
+          });
+        }
+        if (end) {
+          props.saveChat(props.cacheMessages?.id, [...props.cacheMessages.cach, { role: "user", content: input }, { role: "assistant", content: messages }]);
+          setCurrentText('')
         }
       })
-
-      // const aiMessage = response?.data?.choices?.[0]?.message?.content;
-      // // 添加 AI 的回复到界面
-      // if (aiMessage) {
-      //   props.saveChat(props.cacheMessages?.id, [...props.cacheMessages.cach, { role: "user", content: input }, { role: "system", content: aiMessage }])
-      // } else {
-      //   throw Error("未找到消息，请查看返回值对象路径")
-      // }
     } catch (error) {
-      console.error("Error communicating with X.AI API:", error);
+      console.error("Error", error);
     }
     setDisable(false)
     setInput(""); // 清空输入框
+
   };
 
 
@@ -85,6 +62,7 @@ function ChatBot(props: IProps) {
             style={{
               alignSelf: msg.role === "user" ? "flex-end" : "flex-start",
               alignItems: msg.role === "user" ? "flex-end" : "flex-start",
+              display:msg.disable? "none" : "flex",
             }}>
             <strong>{msg.role}</strong>
             <div
@@ -92,10 +70,26 @@ function ChatBot(props: IProps) {
               style={{
                 backgroundColor: msg.role === "user" ? "#DCF8C6" : "#eeeeee",
               }}>
-              {msg.content && (msg.role === "user" ? msg.content : <div dangerouslySetInnerHTML={{ __html: marked(inputDisable ? currentText : msg.content) }} />)}
+              {msg.content && (msg.role === "user" ? msg.content : <div dangerouslySetInnerHTML={{ __html: marked(msg.content) }} />)}
             </div>
           </div>
         ))}
+        {inputDisable && currentText && (
+          <div className="chatItem"
+            style={{
+              alignSelf: "flex-start",
+              alignItems: "flex-start",
+            }}>
+            <strong>assistant</strong>
+            <div
+              className="message"
+              style={{
+                backgroundColor: "#eeeeee",
+              }}>
+              <div dangerouslySetInnerHTML={{ __html: marked(currentText) }} />
+            </div>
+          </div>
+        )}
       </div>
       <div className="inputContainer">
         <input
@@ -124,4 +118,4 @@ function ChatBot(props: IProps) {
 };
 
 
-export default forwardRef(ChatBot);
+export default memo(ChatBot);

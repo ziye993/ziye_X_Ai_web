@@ -52,21 +52,29 @@ body {
 }
 
 
-input{
+input,
+textarea,
+select,
+button {
   background-color: #FFFFFF;
 }
+
 li,
 p,
 span,
 code,
 div {
-  font-size: 22px;
+  font-size: 24px;
   text-align: left;
   line-height: 26px;
   font-family: 'Handwriting', sans-serif, -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
     'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
     sans-serif;
   font-weight: 700;
+}
+
+li {
+  margin-left: 25px;
 }
 
 code {
@@ -97,7 +105,6 @@ button {
   font-size: 1em;
   font-weight: 500;
   font-family: inherit;
-  background-color: #1a1a1a;
   cursor: pointer;
   transition: border-color 0.25s;
 }
@@ -128,6 +135,6 @@ button:focus-visible {
 
 @media only screen and (max-width: 767px) {
   /* 这里放置针对手机的样式 */
-  
- 
+
+
 }
