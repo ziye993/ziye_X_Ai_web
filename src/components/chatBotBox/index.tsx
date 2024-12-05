@@ -31,26 +31,24 @@ function ChatBot(props: IProps) {
         }
       ], (text, end) => {
         if (text) {
+          messages += text;
           setCurrentText((prev) => {
-            messages = prev + text;
-            // props.saveChat(props.cacheMessages?.id, [...props.cacheMessages.cach, { role: "user", content: input }, { role: "assistant", content: messages }]);
             return prev + text
           });
         }
         if (end) {
           props.saveChat(props.cacheMessages?.id, [...props.cacheMessages.cach, { role: "user", content: input }, { role: "assistant", content: messages }]);
-          setCurrentText('')
+          setCurrentText('');
+          setInput("")
         }
       })
+
     } catch (error) {
       console.error("Error", error);
+      props.saveChat(props.cacheMessages?.id, [...props.cacheMessages.cach]);
     }
     setDisable(false)
-    setInput(""); // 清空输入框
-
   };
-
-
 
   return (
     <div className="container" >
@@ -62,7 +60,7 @@ function ChatBot(props: IProps) {
             style={{
               alignSelf: msg.role === "user" ? "flex-end" : "flex-start",
               alignItems: msg.role === "user" ? "flex-end" : "flex-start",
-              display:msg.disable? "none" : "flex",
+              display: msg.disable ? "none" : "flex",
             }}>
             <strong>{msg.role}</strong>
             <div
