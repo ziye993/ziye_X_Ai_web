@@ -18,13 +18,14 @@ function ChatBot(props: IProps) {
 
   const sendMessage = async () => {
     if (!input.trim()) return;
+    const originCach = [...props.cacheMessages.cach];
     setDisable(true);
     props.saveChat(props.cacheMessages?.id, [...props.cacheMessages.cach, { role: "user", content: input }]);
 
     try {
       let messages = "";
       await chunkText([
-        ...(props?.cacheMessages?.cach || []),
+        ...(originCach || []),
         {
           "role": "user",
           "content": input
@@ -37,7 +38,7 @@ function ChatBot(props: IProps) {
           });
         }
         if (end) {
-          props.saveChat(props.cacheMessages?.id, [...props.cacheMessages.cach, { role: "user", content: input }, { role: "assistant", content: messages }]);
+          props.saveChat(props.cacheMessages?.id, [...originCach, { role: "user", content: input }, { role: "assistant", content: messages }]);
           setCurrentText('');
           setInput("")
         }
@@ -45,7 +46,7 @@ function ChatBot(props: IProps) {
 
     } catch (error) {
       console.error("Error", error);
-      props.saveChat(props.cacheMessages?.id, [...props.cacheMessages.cach]);
+      props.saveChat(props.cacheMessages?.id, [...originCach]);
     }
     setDisable(false)
   };
@@ -58,9 +59,9 @@ function ChatBot(props: IProps) {
           <div key={index}
             className="chatItem"
             style={{
-              alignSelf: msg.role === "user" ? "flex-end" : "flex-start",
+              alignSelf: msg.role === "user" ? "flex-end" : "unset",
               alignItems: msg.role === "user" ? "flex-end" : "flex-start",
-              display: msg.disable ? "none" : "flex",
+
             }}>
             <strong>{msg.role}</strong>
             <div

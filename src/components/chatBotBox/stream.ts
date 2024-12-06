@@ -1,4 +1,4 @@
-const apiEndpoint = "http://localhost:3000/xai"; // 替换为实际的 API 端点
+const apiEndpoint = "http://www.ziye993.cn:3000/xai"; // 替换为实际的 API 端点
 const apiKey = "xai-EAKTZcMC9wPG6sZKbcsezRBlT6rme8AcC1WHp96ZqG50rL14ObIgfAL2Bl9ypx8u1Dz7B3zYk76HdN4P"; // 替换为实际的 API 密钥
 
 const endStr = "[DONE]";
