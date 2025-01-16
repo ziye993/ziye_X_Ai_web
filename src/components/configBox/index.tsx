@@ -5,7 +5,7 @@ import ReactDOM from 'react-dom';
 const configStr = localStorage.getItem("config");
 const config = JSON.parse(configStr || "{}");
 const ConfigBox: React.FC = () => {
-  const [foramData, setFormData] = React.useState({
+  const [foramData, setFormData] = React.useState<{ aifix: string, [key: string]: unknown }>({
     ...config
   });
   console.log(foramData)
@@ -28,12 +28,12 @@ const ConfigBox: React.FC = () => {
 
   }, []);
 
-  const save = (e) => {
+  const save = (e: { preventDefault: () => void; }) => {
     e.preventDefault();
     localStorage.setItem("config", JSON.stringify(foramData))
     setShow(false)
   }
-  const clear = (e) => {
+  const clear = (e: { preventDefault: () => void; }) => {
     e.preventDefault();
     setShow(false)
   }

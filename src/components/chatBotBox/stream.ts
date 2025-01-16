@@ -1,9 +1,9 @@
-const apiEndpoint = "http://www.ziye993.cn:3000/xai"; // 替换为实际的 API 端点
+const apiEndpoint = "http://www.ziye993.cn:8080/xai"; // 替换为实际的 API 端点
 const apiKey = "xai-EAKTZcMC9wPG6sZKbcsezRBlT6rme8AcC1WHp96ZqG50rL14ObIgfAL2Bl9ypx8u1Dz7B3zYk76HdN4P"; // 替换为实际的 API 密钥
 
 const endStr = "[DONE]";
 
-const defaultsystemMessageConfig = JSON.parse(localStorage.getItem("config") || "{}");
+// const defaultsystemMessageConfig = JSON.parse(localStorage.getItem("config") || "{}");
 // const defaultsystemMessage = defaultsystemMessageConfig.aifix || "";
 // const defaultConfigMessage = [];
 async function readStreamAndDisplay(
@@ -51,7 +51,7 @@ async function readStreamAndDisplay(
     }
 }
 
-export default async function chunkText(messages: { role: string, content: string }[], updateCallback: (chunk: string, end?: boolean) => void) {
+export default async function chunkText(data: { messages: { role: string, content: string }[], id: string }, updateCallback: (chunk: string, end?: boolean) => void) {
     const response = await fetch(apiEndpoint, {
         method: 'POST',
         headers: {
@@ -60,10 +60,11 @@ export default async function chunkText(messages: { role: string, content: strin
         },
         body: JSON.stringify({
             // "messages": [...defaultConfigMessage, ...messages],
-            "messages": messages,
+            "messages": data.messages,
             "model": "grok-beta",
             "stream": true,
-            "temperature": 0
+            "temperature": 0,
+            messageId: data.id,
         }),
     });
     if (response.body) {

@@ -1,36 +1,50 @@
-import React, { memo, useState } from "react";
+import { memo, useEffect, useState } from "react";
 import { marked } from 'marked';
 import './index.css'
 import 'highlight.js/styles/github.css'; // 选择一个样式
 import { ICachItem, IListItem } from "../../App";
 import chunkText from "./stream";
+import { getOnlineStatus } from "./api";
 
 interface IProps {
   cacheMessages: IListItem;
   saveChat: (id: string, cach: ICachItem[]) => void;
 }
 
+
+const config = JSON.parse(localStorage.getItem("config") || "{}");
+const defaultMessageObj: ICachItem[] = config.aifix ? [{
+  role: "user",
+  content: config.aifix,
+  hidden: true,
+  type: "tips",
+}] : [];
+
 function ChatBot(props: IProps) {
   // const [messages, setMessages] = useState<{ role: string; content: string }[]>(props?.cacheMessages?.cach || []);
   const [inputDisable, setDisable] = useState<boolean>(false);
   const [currentText, setCurrentText] = useState('')
   const [input, setInput] = useState("");
+  const [isOnline, setIsOnline] = useState(false)
 
   const sendMessage = async () => {
     if (!input.trim()) return;
     const originCach = [...props.cacheMessages.cach];
-    setDisable(true);
+    if (originCach)
+      setDisable(true);
     props.saveChat(props.cacheMessages?.id, [...props.cacheMessages.cach, { role: "user", content: input }]);
 
     try {
       let messages = "";
-      await chunkText([
-        ...(originCach || []),
-        {
-          "role": "user",
-          "content": input
-        }
-      ], (text, end) => {
+      await chunkText({
+        messages: [
+          ...(originCach || []),
+          {
+            "role": "user",
+            "content": input
+          }
+        ], id: props.cacheMessages.id
+      }, (text, end) => {
         if (text) {
           messages += text;
           setCurrentText((prev) => {
@@ -51,11 +65,20 @@ function ChatBot(props: IProps) {
     setDisable(false)
   };
 
+  const getOnline = async () => {
+    const res = await getOnlineStatus();
+    setIsOnline(res.data)
+    console.log(res);
+  }
+  useEffect(() => {
+    getOnline()
+  }, [])
+
   return (
     <div className="container" >
-      <h1>X.AI</h1>
+      <h1>X.AI<div className="isOnline" style={{ backgroundColor: isOnline ? "green" : "#333333" }}></div><span> {`(`}{isOnline ? "在线" : "离线"}{`)`}</span></h1>
       <div className="chatBox" >
-        {props?.cacheMessages?.cach?.map((msg, index) => (
+        {props?.cacheMessages?.cach?.map((msg, index) => msg.hidden ? (<></>) : (
           <div key={index}
             className="chatItem"
             style={{

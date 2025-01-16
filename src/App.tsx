@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react'
+import { useState } from 'react'
 import './App.css'
 import ChatBot from './components/chatBotBox'
 import ChatTool from './components/chatTool'
@@ -8,25 +8,44 @@ import ConfigBox from './components/configBox';
 export interface ICachItem {
   role: string;
   content: string;
+  hidden?: boolean;
+  type?: "tips";
 }
 
 export interface IListItem {
   id: string;
-  selected: boolean;
+  selected?: boolean;
   cach: ICachItem[];
 }
 
-
-const defaultMessageObj: IListItem[] = [];
+const config = JSON.parse(localStorage.getItem("config") || "{}");
+const defaultMessageObj: ICachItem[] = config.aifix ? [{
+  role: "user",
+  content: config.aifix,
+  hidden: true,
+  type: "tips",
+}] : [];
 const cacheMessagesJson = JSON.parse(localStorage.getItem("cacheMessages") || "[]");
 
-const cacheMessages = cacheMessagesJson.length ? cacheMessagesJson : [{ id: Math.random() + "", cach: defaultMessageObj, selected: true }];
-const after = cacheMessages.find((item: IListItem) => item.selected === true);
-console.log(cacheMessages)
+const cacheMessages: IListItem[] = cacheMessagesJson.length ? cacheMessagesJson : [{ id: Math.random() + "", cach: defaultMessageObj, selected: true }];
+const after = cacheMessages.findIndex((item: IListItem) => item.selected === true);
+console.log(cacheMessages);
 function App() {
   const [list, setList] = useState<IListItem[]>(cacheMessages || [{}])
-  const [current, setCurrent] = useState(after > -1 ? after : 0);
-  const chatRef = useRef(null);
+  const [current, setCurrent] = useState<number>(after > -1 ? after : 0);
+
+  function getdefaultMessageCach() {
+
+    const config = JSON.parse(localStorage.getItem("config") || "{}");
+    const defaultMessageObj: ICachItem[] = config.aifix ? [{
+      role: "system",
+      content: config.aifix,
+      hidden: true,
+      type: "tips",
+    }] : [];
+    return defaultMessageObj;
+  }
+
   const saveChat = (id: string, cach: ICachItem[]) => {
     setList((prev) => {
       const index = prev.findIndex((item: IListItem) => item.id === id);
@@ -61,9 +80,10 @@ function App() {
   }
 
   const newChat = () => {
+    const newDefaultMessageCach = getdefaultMessageCach();
     const newId = Math.random() + "";
     setList((prev) => {
-      const newList = [...prev, { id: newId, cach: defaultMessageObj, selected: true }];
+      const newList = [...prev, { id: newId, cach: newDefaultMessageCach, selected: true }];
       localStorage.setItem("cacheMessages", JSON.stringify(newList));
       return newList
     });
@@ -85,7 +105,7 @@ function App() {
 
   return (
     <>
-      <ChatBot cacheMessages={list[current]} saveChat={saveChat} ref={chatRef} />
+      <ChatBot cacheMessages={list[current]} saveChat={saveChat} />
       <ChatList current={current} list={list} setCurrent={setCurrent} clearChat={clearChat} />
       <ChatTool clearChat={clearChat} newChat={newChat} setConfig={setConfig} clearAllChat={clearAllChat} />
       <ConfigBox />
